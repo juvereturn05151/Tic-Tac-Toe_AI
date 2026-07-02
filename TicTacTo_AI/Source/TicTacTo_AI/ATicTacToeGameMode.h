@@ -8,24 +8,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "TicTacToeTypes.h"
 #include "ATicTacToeGameMode.generated.h"
-
-UENUM(BlueprintType)
-enum class ETileState : uint8
-{
-    Empty UMETA(DisplayName = "Empty"),
-    X     UMETA(DisplayName = "X"),
-    O     UMETA(DisplayName = "O")
-};
-
-UENUM(BlueprintType)
-enum class ETicTacToePlayMode : uint8
-{
-    PlayerVsPlayer                  UMETA(DisplayName = "Player vs Player"),
-    PlayerVsRandomAI                UMETA(DisplayName = "Player vs AI (Random)"),
-    PlayerVsAlphaBetaAI             UMETA(DisplayName = "Player vs AI (Alpha-Beta)"),
-    PlayerVsReinforcementLearningAI UMETA(DisplayName = "Player vs AI (Reinforcement Learning)")
-};
 
 UCLASS()
 class TICTACTO_AI_API ATicTacToeGameMode : public AGameModeBase
@@ -77,8 +61,5 @@ private:
     void MakeAlphaBetaAIMove();
     void MakeReinforcementLearningAIMove();
     bool IsAIMode() const;
-    int32 Minimax(bool bIsMaximizing, int32 Depth, int32 Alpha, int32 Beta);
-    bool CheckWinner(ETileState Player) const;
-    bool CheckDraw() const;
     void SwitchTurn();
 };
