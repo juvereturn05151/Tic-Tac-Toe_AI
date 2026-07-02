@@ -18,6 +18,13 @@ enum class ETileState : uint8
     O     UMETA(DisplayName = "O")
 };
 
+UENUM(BlueprintType)
+enum class ETicTacToePlayMode : uint8
+{
+    PlayerVsPlayer UMETA(DisplayName = "Player vs Player"),
+    PlayerVsAI     UMETA(DisplayName = "Player vs AI")
+};
+
 UCLASS()
 class TICTACTO_AI_API ATicTacToeGameMode : public AGameModeBase
 {
@@ -38,6 +45,9 @@ public:
     UPROPERTY(BlueprintReadOnly, Category = "TicTacToe")
     ETileState Winner;
 
+    UPROPERTY(BlueprintReadOnly, Category = "TicTacToe")
+    ETicTacToePlayMode PlayMode;
+
     UFUNCTION(BlueprintCallable, Category = "TicTacToe")
     bool MakeMove(int32 Index);
 
@@ -53,7 +63,15 @@ public:
     UFUNCTION(BlueprintCallable, Category = "TicTacToe")
     FString GetStatusText() const;
 
+    UFUNCTION(BlueprintCallable, Category = "TicTacToe")
+    void SetPlayMode(ETicTacToePlayMode NewPlayMode);
+
+    UFUNCTION(BlueprintCallable, Category = "TicTacToe")
+    ETicTacToePlayMode GetPlayMode() const;
+
 private:
+    bool MakeMoveForCurrentPlayer(int32 Index);
+    void MakeRandomAIMove();
     bool CheckWinner(ETileState Player) const;
     bool CheckDraw() const;
     void SwitchTurn();

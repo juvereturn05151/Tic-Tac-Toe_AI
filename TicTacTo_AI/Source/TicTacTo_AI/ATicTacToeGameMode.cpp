@@ -8,6 +8,7 @@
 
 ATicTacToeGameMode::ATicTacToeGameMode()
 {
+    PlayMode = ETicTacToePlayMode::PlayerVsPlayer;
     ResetGame();
 }
 
@@ -27,6 +28,23 @@ void ATicTacToeGameMode::ResetGame()
 }
 
 bool ATicTacToeGameMode::MakeMove(int32 Index)
+{
+    if (PlayMode == ETicTacToePlayMode::PlayerVsAI && CurrentPlayer == ETileState::O)
+    {
+        return false;
+    }
+
+    const bool bMoveMade = MakeMoveForCurrentPlayer(Index);
+
+    if (bMoveMade && PlayMode == ETicTacToePlayMode::PlayerVsAI && !bGameOver && CurrentPlayer == ETileState::O)
+    {
+        MakeRandomAIMove();
+    }
+
+    return bMoveMade;
+}
+
+bool ATicTacToeGameMode::MakeMoveForCurrentPlayer(int32 Index)
 {
     if (bGameOver)
     {
@@ -98,13 +116,55 @@ FString ATicTacToeGameMode::GetStatusText() const
 
         if (Winner == ETileState::O)
         {
+            if (PlayMode == ETicTacToePlayMode::PlayerVsAI)
+            {
+                return TEXT("AI Wins!");
+            }
+
             return TEXT("O Wins!");
         }
 
         return TEXT("Draw!");
     }
 
+    if (PlayMode == ETicTacToePlayMode::PlayerVsAI)
+    {
+        return CurrentPlayer == ETileState::X ? TEXT("Your Turn") : TEXT("AI's Turn");
+    }
+
     return CurrentPlayer == ETileState::X ? TEXT("X's Turn") : TEXT("O's Turn");
+}
+
+void ATicTacToeGameMode::SetPlayMode(ETicTacToePlayMode NewPlayMode)
+{
+    PlayMode = NewPlayMode;
+    ResetGame();
+}
+
+ETicTacToePlayMode ATicTacToeGameMode::GetPlayMode() const
+{
+    return PlayMode;
+}
+
+void ATicTacToeGameMode::MakeRandomAIMove()
+{
+    TArray<int32> EmptyTiles;
+
+    for (int32 Index = 0; Index < Board.Num(); ++Index)
+    {
+        if (Board[Index] == ETileState::Empty)
+        {
+            EmptyTiles.Add(Index);
+        }
+    }
+
+    if (EmptyTiles.Num() == 0)
+    {
+        return;
+    }
+
+    const int32 RandomTileIndex = FMath::RandRange(0, EmptyTiles.Num() - 1);
+    MakeMoveForCurrentPlayer(EmptyTiles[RandomTileIndex]);
 }
 
 void ATicTacToeGameMode::SwitchTurn()

@@ -81,6 +81,15 @@ protected:
     UPROPERTY(meta = (BindWidget))
     UButton* RestartButton;
 
+    UPROPERTY(meta = (BindWidgetOptional))
+    UTextBlock* ModeText;
+
+    UPROPERTY(meta = (BindWidgetOptional))
+    UButton* PlayerVsPlayerButton;
+
+    UPROPERTY(meta = (BindWidgetOptional))
+    UButton* PlayerVsAIButton;
+
     UFUNCTION()
     void OnTileButton0Clicked();
 
@@ -110,6 +119,12 @@ protected:
 
     UFUNCTION()
     void OnRestartClicked();
+
+    UFUNCTION()
+    void OnPlayerVsPlayerClicked();
+
+    UFUNCTION()
+    void OnPlayerVsAIClicked();
 
     void HandleTileClicked(int32 Index);
     void UpdateBoardUI();

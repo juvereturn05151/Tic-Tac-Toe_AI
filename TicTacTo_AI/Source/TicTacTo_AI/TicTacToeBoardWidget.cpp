@@ -75,6 +75,18 @@ void UTicTacToeBoardWidget::NativeConstruct()
         RestartButton->OnClicked.AddDynamic(this, &UTicTacToeBoardWidget::OnRestartClicked);
     }
 
+    if (PlayerVsPlayerButton)
+    {
+        PlayerVsPlayerButton->OnClicked.RemoveDynamic(this, &UTicTacToeBoardWidget::OnPlayerVsPlayerClicked);
+        PlayerVsPlayerButton->OnClicked.AddDynamic(this, &UTicTacToeBoardWidget::OnPlayerVsPlayerClicked);
+    }
+
+    if (PlayerVsAIButton)
+    {
+        PlayerVsAIButton->OnClicked.RemoveDynamic(this, &UTicTacToeBoardWidget::OnPlayerVsAIClicked);
+        PlayerVsAIButton->OnClicked.AddDynamic(this, &UTicTacToeBoardWidget::OnPlayerVsAIClicked);
+    }
+
     UpdateBoardUI();
 }
 
@@ -135,6 +147,30 @@ void UTicTacToeBoardWidget::OnRestartClicked()
     UpdateBoardUI();
 }
 
+void UTicTacToeBoardWidget::OnPlayerVsPlayerClicked()
+{
+    ATicTacToeGameMode* TicTacToeGameMode = Cast<ATicTacToeGameMode>(UGameplayStatics::GetGameMode(this));
+    if (!TicTacToeGameMode)
+    {
+        return;
+    }
+
+    TicTacToeGameMode->SetPlayMode(ETicTacToePlayMode::PlayerVsPlayer);
+    UpdateBoardUI();
+}
+
+void UTicTacToeBoardWidget::OnPlayerVsAIClicked()
+{
+    ATicTacToeGameMode* TicTacToeGameMode = Cast<ATicTacToeGameMode>(UGameplayStatics::GetGameMode(this));
+    if (!TicTacToeGameMode)
+    {
+        return;
+    }
+
+    TicTacToeGameMode->SetPlayMode(ETicTacToePlayMode::PlayerVsAI);
+    UpdateBoardUI();
+}
+
 void UTicTacToeBoardWidget::HandleTileClicked(int32 Index)
 {
     ATicTacToeGameMode* TicTacToeGameMode = Cast<ATicTacToeGameMode>(UGameplayStatics::GetGameMode(this));
@@ -179,5 +215,13 @@ void UTicTacToeBoardWidget::UpdateBoardUI()
     if (StatusText)
     {
         StatusText->SetText(FText::FromString(TicTacToeGameMode->GetStatusText()));
+    }
+
+    if (ModeText)
+    {
+        const FString ModeLabel = TicTacToeGameMode->GetPlayMode() == ETicTacToePlayMode::PlayerVsAI
+            ? TEXT("Player vs AI")
+            : TEXT("Player vs Player");
+        ModeText->SetText(FText::FromString(ModeLabel));
     }
 }
