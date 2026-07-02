@@ -87,6 +87,18 @@ void UTicTacToeBoardWidget::NativeConstruct()
         PlayerVsAIButton->OnClicked.AddDynamic(this, &UTicTacToeBoardWidget::OnPlayerVsAIClicked);
     }
 
+    if (PlayerVsAlphaBetaAIButton)
+    {
+        PlayerVsAlphaBetaAIButton->OnClicked.RemoveDynamic(this, &UTicTacToeBoardWidget::OnPlayerVsAlphaBetaAIClicked);
+        PlayerVsAlphaBetaAIButton->OnClicked.AddDynamic(this, &UTicTacToeBoardWidget::OnPlayerVsAlphaBetaAIClicked);
+    }
+
+    if (PlayerVsReinforcementLearningAIButton)
+    {
+        PlayerVsReinforcementLearningAIButton->OnClicked.RemoveDynamic(this, &UTicTacToeBoardWidget::OnPlayerVsReinforcementLearningAIClicked);
+        PlayerVsReinforcementLearningAIButton->OnClicked.AddDynamic(this, &UTicTacToeBoardWidget::OnPlayerVsReinforcementLearningAIClicked);
+    }
+
     UpdateBoardUI();
 }
 
@@ -167,7 +179,31 @@ void UTicTacToeBoardWidget::OnPlayerVsAIClicked()
         return;
     }
 
-    TicTacToeGameMode->SetPlayMode(ETicTacToePlayMode::PlayerVsAI);
+    TicTacToeGameMode->SetPlayMode(ETicTacToePlayMode::PlayerVsRandomAI);
+    UpdateBoardUI();
+}
+
+void UTicTacToeBoardWidget::OnPlayerVsAlphaBetaAIClicked()
+{
+    ATicTacToeGameMode* TicTacToeGameMode = Cast<ATicTacToeGameMode>(UGameplayStatics::GetGameMode(this));
+    if (!TicTacToeGameMode)
+    {
+        return;
+    }
+
+    TicTacToeGameMode->SetPlayMode(ETicTacToePlayMode::PlayerVsAlphaBetaAI);
+    UpdateBoardUI();
+}
+
+void UTicTacToeBoardWidget::OnPlayerVsReinforcementLearningAIClicked()
+{
+    ATicTacToeGameMode* TicTacToeGameMode = Cast<ATicTacToeGameMode>(UGameplayStatics::GetGameMode(this));
+    if (!TicTacToeGameMode)
+    {
+        return;
+    }
+
+    TicTacToeGameMode->SetPlayMode(ETicTacToePlayMode::PlayerVsReinforcementLearningAI);
     UpdateBoardUI();
 }
 
@@ -219,9 +255,21 @@ void UTicTacToeBoardWidget::UpdateBoardUI()
 
     if (ModeText)
     {
-        const FString ModeLabel = TicTacToeGameMode->GetPlayMode() == ETicTacToePlayMode::PlayerVsAI
-            ? TEXT("Player vs AI")
-            : TEXT("Player vs Player");
+        FString ModeLabel = TEXT("Player vs Player");
+
+        if (TicTacToeGameMode->GetPlayMode() == ETicTacToePlayMode::PlayerVsRandomAI)
+        {
+            ModeLabel = TEXT("Player vs AI (Random)");
+        }
+        else if (TicTacToeGameMode->GetPlayMode() == ETicTacToePlayMode::PlayerVsAlphaBetaAI)
+        {
+            ModeLabel = TEXT("Player vs AI (Alpha-Beta)");
+        }
+        else if (TicTacToeGameMode->GetPlayMode() == ETicTacToePlayMode::PlayerVsReinforcementLearningAI)
+        {
+            ModeLabel = TEXT("Player vs AI (Reinforcement Learning)");
+        }
+
         ModeText->SetText(FText::FromString(ModeLabel));
     }
 }

@@ -90,6 +90,12 @@ protected:
     UPROPERTY(meta = (BindWidgetOptional))
     UButton* PlayerVsAIButton;
 
+    UPROPERTY(meta = (BindWidgetOptional))
+    UButton* PlayerVsAlphaBetaAIButton;
+
+    UPROPERTY(meta = (BindWidgetOptional))
+    UButton* PlayerVsReinforcementLearningAIButton;
+
     UFUNCTION()
     void OnTileButton0Clicked();
 
@@ -125,6 +131,12 @@ protected:
 
     UFUNCTION()
     void OnPlayerVsAIClicked();
+
+    UFUNCTION()
+    void OnPlayerVsAlphaBetaAIClicked();
+
+    UFUNCTION()
+    void OnPlayerVsReinforcementLearningAIClicked();
 
     void HandleTileClicked(int32 Index);
     void UpdateBoardUI();

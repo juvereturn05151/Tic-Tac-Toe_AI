@@ -21,8 +21,10 @@ enum class ETileState : uint8
 UENUM(BlueprintType)
 enum class ETicTacToePlayMode : uint8
 {
-    PlayerVsPlayer UMETA(DisplayName = "Player vs Player"),
-    PlayerVsAI     UMETA(DisplayName = "Player vs AI")
+    PlayerVsPlayer                  UMETA(DisplayName = "Player vs Player"),
+    PlayerVsRandomAI                UMETA(DisplayName = "Player vs AI (Random)"),
+    PlayerVsAlphaBetaAI             UMETA(DisplayName = "Player vs AI (Alpha-Beta)"),
+    PlayerVsReinforcementLearningAI UMETA(DisplayName = "Player vs AI (Reinforcement Learning)")
 };
 
 UCLASS()
@@ -72,6 +74,10 @@ public:
 private:
     bool MakeMoveForCurrentPlayer(int32 Index);
     void MakeRandomAIMove();
+    void MakeAlphaBetaAIMove();
+    void MakeReinforcementLearningAIMove();
+    bool IsAIMode() const;
+    int32 Minimax(bool bIsMaximizing, int32 Depth, int32 Alpha, int32 Beta);
     bool CheckWinner(ETileState Player) const;
     bool CheckDraw() const;
     void SwitchTurn();

@@ -29,16 +29,27 @@ void ATicTacToeGameMode::ResetGame()
 
 bool ATicTacToeGameMode::MakeMove(int32 Index)
 {
-    if (PlayMode == ETicTacToePlayMode::PlayerVsAI && CurrentPlayer == ETileState::O)
+    if (IsAIMode() && CurrentPlayer == ETileState::O)
     {
         return false;
     }
 
     const bool bMoveMade = MakeMoveForCurrentPlayer(Index);
 
-    if (bMoveMade && PlayMode == ETicTacToePlayMode::PlayerVsAI && !bGameOver && CurrentPlayer == ETileState::O)
+    if (bMoveMade && IsAIMode() && !bGameOver && CurrentPlayer == ETileState::O)
     {
-        MakeRandomAIMove();
+        if (PlayMode == ETicTacToePlayMode::PlayerVsAlphaBetaAI)
+        {
+            MakeAlphaBetaAIMove();
+        }
+        else if (PlayMode == ETicTacToePlayMode::PlayerVsReinforcementLearningAI)
+        {
+            MakeReinforcementLearningAIMove();
+        }
+        else
+        {
+            MakeRandomAIMove();
+        }
     }
 
     return bMoveMade;
@@ -116,7 +127,7 @@ FString ATicTacToeGameMode::GetStatusText() const
 
         if (Winner == ETileState::O)
         {
-            if (PlayMode == ETicTacToePlayMode::PlayerVsAI)
+            if (IsAIMode())
             {
                 return TEXT("AI Wins!");
             }
@@ -127,7 +138,7 @@ FString ATicTacToeGameMode::GetStatusText() const
         return TEXT("Draw!");
     }
 
-    if (PlayMode == ETicTacToePlayMode::PlayerVsAI)
+    if (IsAIMode())
     {
         return CurrentPlayer == ETileState::X ? TEXT("Your Turn") : TEXT("AI's Turn");
     }
@@ -165,6 +176,112 @@ void ATicTacToeGameMode::MakeRandomAIMove()
 
     const int32 RandomTileIndex = FMath::RandRange(0, EmptyTiles.Num() - 1);
     MakeMoveForCurrentPlayer(EmptyTiles[RandomTileIndex]);
+}
+
+void ATicTacToeGameMode::MakeAlphaBetaAIMove()
+{
+    int32 BestScore = TNumericLimits<int32>::Min();
+    int32 BestMove = INDEX_NONE;
+
+    for (int32 Index = 0; Index < Board.Num(); ++Index)
+    {
+        if (Board[Index] != ETileState::Empty)
+        {
+            continue;
+        }
+
+        Board[Index] = ETileState::O;
+        const int32 MoveScore = Minimax(false, 0, TNumericLimits<int32>::Min(), TNumericLimits<int32>::Max());
+        Board[Index] = ETileState::Empty;
+
+        if (MoveScore > BestScore)
+        {
+            BestScore = MoveScore;
+            BestMove = Index;
+        }
+    }
+
+    if (BestMove != INDEX_NONE)
+    {
+        MakeMoveForCurrentPlayer(BestMove);
+    }
+}
+
+bool ATicTacToeGameMode::IsAIMode() const
+{
+    return PlayMode == ETicTacToePlayMode::PlayerVsRandomAI
+        || PlayMode == ETicTacToePlayMode::PlayerVsAlphaBetaAI
+        || PlayMode == ETicTacToePlayMode::PlayerVsReinforcementLearningAI;
+}
+
+void ATicTacToeGameMode::MakeReinforcementLearningAIMove()
+{
+    MakeRandomAIMove();
+}
+
+int32 ATicTacToeGameMode::Minimax(bool bIsMaximizing, int32 Depth, int32 Alpha, int32 Beta)
+{
+    if (CheckWinner(ETileState::O))
+    {
+        return 10 - Depth;
+    }
+
+    if (CheckWinner(ETileState::X))
+    {
+        return Depth - 10;
+    }
+
+    if (CheckDraw())
+    {
+        return 0;
+    }
+
+    if (bIsMaximizing)
+    {
+        int32 BestScore = TNumericLimits<int32>::Min();
+
+        for (int32 Index = 0; Index < Board.Num(); ++Index)
+        {
+            if (Board[Index] != ETileState::Empty)
+            {
+                continue;
+            }
+
+            Board[Index] = ETileState::O;
+            BestScore = FMath::Max(BestScore, Minimax(false, Depth + 1, Alpha, Beta));
+            Board[Index] = ETileState::Empty;
+
+            Alpha = FMath::Max(Alpha, BestScore);
+            if (Beta <= Alpha)
+            {
+                break;
+            }
+        }
+
+        return BestScore;
+    }
+
+    int32 BestScore = TNumericLimits<int32>::Max();
+
+    for (int32 Index = 0; Index < Board.Num(); ++Index)
+    {
+        if (Board[Index] != ETileState::Empty)
+        {
+            continue;
+        }
+
+        Board[Index] = ETileState::X;
+        BestScore = FMath::Min(BestScore, Minimax(true, Depth + 1, Alpha, Beta));
+        Board[Index] = ETileState::Empty;
+
+        Beta = FMath::Min(Beta, BestScore);
+        if (Beta <= Alpha)
+        {
+            break;
+        }
+    }
+
+    return BestScore;
 }
 
 void ATicTacToeGameMode::SwitchTurn()
