@@ -47,6 +47,12 @@ public:
     UFUNCTION(BlueprintCallable, Category = "TicTacToe")
     ETileState GetTileState(int32 Index) const;
 
+    UFUNCTION(BlueprintCallable, Category = "TicTacToe")
+    FString GetTileText(int32 Index) const;
+
+    UFUNCTION(BlueprintCallable, Category = "TicTacToe")
+    FString GetStatusText() const;
+
 private:
     bool CheckWinner(ETileState Player) const;
     bool CheckDraw() const;

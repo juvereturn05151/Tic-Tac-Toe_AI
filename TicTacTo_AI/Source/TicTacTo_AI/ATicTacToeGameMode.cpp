@@ -73,6 +73,40 @@ ETileState ATicTacToeGameMode::GetTileState(int32 Index) const
     return Board[Index];
 }
 
+FString ATicTacToeGameMode::GetTileText(int32 Index) const
+{
+    switch (GetTileState(Index))
+    {
+    case ETileState::X:
+        return TEXT("X");
+    case ETileState::O:
+        return TEXT("O");
+    case ETileState::Empty:
+    default:
+        return TEXT("");
+    }
+}
+
+FString ATicTacToeGameMode::GetStatusText() const
+{
+    if (bGameOver)
+    {
+        if (Winner == ETileState::X)
+        {
+            return TEXT("X Wins!");
+        }
+
+        if (Winner == ETileState::O)
+        {
+            return TEXT("O Wins!");
+        }
+
+        return TEXT("Draw!");
+    }
+
+    return CurrentPlayer == ETileState::X ? TEXT("X's Turn") : TEXT("O's Turn");
+}
+
 void ATicTacToeGameMode::SwitchTurn()
 {
     CurrentPlayer = CurrentPlayer == ETileState::X ? ETileState::O : ETileState::X;
