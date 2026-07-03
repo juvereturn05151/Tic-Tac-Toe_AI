@@ -180,7 +180,7 @@ void ATicTacToeGameMode::StartConfiguredMatch(ETicTacToeControllerType NewXContr
     ResetGame();
 }
 
-bool ATicTacToeGameMode::StartRLTrainingPlaceholder(ETicTacToeControllerType NewXController, ETicTacToeControllerType NewOController, ETicTacToeRLAgentSlot NewXRLAgentSlot, ETicTacToeRLAgentSlot NewORLAgentSlot)
+bool ATicTacToeGameMode::StartRLTrainingPlaceholder(ETicTacToeControllerType NewXController, ETicTacToeControllerType NewOController, ETicTacToeRLAgentSlot NewXRLAgentSlot, ETicTacToeRLAgentSlot NewORLAgentSlot, FTicTacToeRLTrainingSettings TrainingSettings)
 {
     if (NewXController != ETicTacToeControllerType::ReinforcementLearningAI
         && NewOController != ETicTacToeControllerType::ReinforcementLearningAI)
@@ -193,8 +193,19 @@ bool ATicTacToeGameMode::StartRLTrainingPlaceholder(ETicTacToeControllerType New
     XRLAgentSlot = NewXRLAgentSlot;
     ORLAgentSlot = NewORLAgentSlot;
 
+    TrainingSettings.EpisodeCount = FMath::Max(1, TrainingSettings.EpisodeCount);
+    TrainingSettings.LearningRate = FMath::Clamp(TrainingSettings.LearningRate, 0.0f, 1.0f);
+    TrainingSettings.DiscountFactor = FMath::Clamp(TrainingSettings.DiscountFactor, 0.0f, 1.0f);
+    TrainingSettings.ExplorationRate = FMath::Clamp(TrainingSettings.ExplorationRate, 0.0f, 1.0f);
+
     // Future RL training hook: connect the trainer here, using XRLAgentSlot and ORLAgentSlot
-    // to choose which saved agent(s) are updated. For now training is only validated and acknowledged.
+    // to choose which saved agent(s) are updated and TrainingSettings to configure the run.
+    UE_LOG(LogTemp, Log, TEXT("RL training placeholder: Episodes=%d LearningRate=%.3f DiscountFactor=%.3f ExplorationRate=%.3f"),
+        TrainingSettings.EpisodeCount,
+        TrainingSettings.LearningRate,
+        TrainingSettings.DiscountFactor,
+        TrainingSettings.ExplorationRate);
+
     return true;
 }
 

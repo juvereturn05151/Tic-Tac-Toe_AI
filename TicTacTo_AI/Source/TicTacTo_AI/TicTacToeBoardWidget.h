@@ -12,6 +12,7 @@
 #include "TicTacToeBoardWidget.generated.h"
 
 class UButton;
+class USpinBox;
 class UTextBlock;
 class UWidget;
 
@@ -219,6 +220,21 @@ protected:
     UTextBlock* MenuWarningText;
 
     UPROPERTY(meta = (BindWidgetOptional))
+    UWidget* TrainingSettingsPanel;
+
+    UPROPERTY(meta = (BindWidgetOptional))
+    USpinBox* TrainingEpisodeSpinBox;
+
+    UPROPERTY(meta = (BindWidgetOptional))
+    USpinBox* LearningRateSpinBox;
+
+    UPROPERTY(meta = (BindWidgetOptional))
+    USpinBox* DiscountFactorSpinBox;
+
+    UPROPERTY(meta = (BindWidgetOptional))
+    USpinBox* ExplorationRateSpinBox;
+
+    UPROPERTY(meta = (BindWidgetOptional))
     UWidget* ModeSelectPanel;
 
     UPROPERTY(meta = (BindWidgetOptional))
@@ -241,6 +257,7 @@ protected:
     ETicTacToeRLAgentSlot LeftRLAgentSlot = ETicTacToeRLAgentSlot::Slot1;
     ETicTacToeRLAgentSlot RightRLAgentSlot = ETicTacToeRLAgentSlot::Slot1;
     ETicTacToeMenuAction CurrentMenuAction = ETicTacToeMenuAction::Play;
+    FTicTacToeRLTrainingSettings PendingTrainingSettings;
 
     UFUNCTION()
     void OnTileButton0Clicked();
@@ -385,6 +402,10 @@ protected:
     FString GetMenuActionLabel(ETicTacToeMenuAction MenuAction) const;
     void UpdateSelectionUI();
     bool ValidateTrainingSetup() const;
+    void InitializeTrainingSettingsUI();
+    void RefreshTrainingSettingsUI();
+    FTicTacToeRLTrainingSettings GetTrainingSettingsFromUI() const;
+    void SetTrainingSettingsControlsVisibility(bool bVisible) const;
     void StartMatch();
     void StartRLTrainingPlaceholder();
     void ShowModeSelect();

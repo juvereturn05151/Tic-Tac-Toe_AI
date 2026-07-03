@@ -41,6 +41,11 @@ SelectionMenuPanel
     MenuActionPreviousButton
     MenuActionText
     MenuActionNextButton
+    TrainingSettingsPanel
+      TrainingEpisodeSpinBox
+      LearningRateSpinBox
+      DiscountFactorSpinBox
+      ExplorationRateSpinBox
     MainActionButton
       MainActionButtonText
     MenuWarningText
@@ -54,6 +59,17 @@ The controller arrows cycle through:
 - AI RL
 
 The RL agent panels are hidden unless that side is set to `AI RL`.
+
+`TrainingSettingsPanel` is hidden unless `MenuActionText` is set to `Train`.
+Use editable `SpinBox` widgets for the four training values so the layout and
+styling can be changed later in UMG without touching C++.
+
+Suggested defaults:
+
+- `TrainingEpisodeSpinBox`: `10000`, min `1`
+- `LearningRateSpinBox`: `0.1`, range `0.0` to `1.0`
+- `DiscountFactorSpinBox`: `0.95`, range `0.0` to `1.0`
+- `ExplorationRateSpinBox`: `1.0`, range `0.0` to `1.0`
 
 ## Required Widget Names
 
@@ -80,6 +96,11 @@ These names are bound by `UTicTacToeBoardWidget`:
 - `MainActionButton`
 - `MainActionButtonText`
 - `MenuWarningText`
+- `TrainingSettingsPanel`
+- `TrainingEpisodeSpinBox`
+- `LearningRateSpinBox`
+- `DiscountFactorSpinBox`
+- `ExplorationRateSpinBox`
 - `BoardPanel`
 
 Keep the existing board widget names:
@@ -97,3 +118,5 @@ Keep the existing board widget names:
 - `AI RL` currently uses Random AI behavior as a placeholder.
 - Connect saved RL agent loading in `ATicTacToeGameMode::StartConfiguredMatch`.
 - Connect real RL training in `ATicTacToeGameMode::StartRLTrainingPlaceholder`.
+- Real RL training should consume `FTicTacToeRLTrainingSettings`, which already
+  carries episode count, learning rate, discount factor, and exploration rate.

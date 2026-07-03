@@ -66,3 +66,21 @@ enum class ETicTacToeMenuAction : uint8
     Play  UMETA(DisplayName = "Play"),
     Train UMETA(DisplayName = "Train")
 };
+
+USTRUCT(BlueprintType)
+struct TICTACTO_AI_API FTicTacToeRLTrainingSettings
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TicTacToe|RL Training", meta = (ClampMin = "1", UIMin = "1"))
+    int32 EpisodeCount = 10000;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TicTacToe|RL Training", meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
+    float LearningRate = 0.1f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TicTacToe|RL Training", meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
+    float DiscountFactor = 0.95f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TicTacToe|RL Training", meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
+    float ExplorationRate = 1.0f;
+};

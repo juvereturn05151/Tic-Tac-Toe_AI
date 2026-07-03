@@ -7,6 +7,7 @@
 #include "TicTacToeBoardWidget.h"
 
 #include "Components/Button.h"
+#include "Components/SpinBox.h"
 #include "Components/TextBlock.h"
 #include "Components/Widget.h"
 #include "Kismet/GameplayStatics.h"
@@ -256,6 +257,7 @@ void UTicTacToeBoardWidget::NativeConstruct()
         MainActionButton->OnClicked.AddDynamic(this, &UTicTacToeBoardWidget::OnMainActionClicked);
     }
 
+    InitializeTrainingSettingsUI();
     ShowModeSelect();
 }
 
@@ -903,12 +905,107 @@ void UTicTacToeBoardWidget::UpdateSelectionUI()
     {
         StatusText->SetText(FText::FromString(TEXT("Configure both sides")));
     }
+
+    RefreshTrainingSettingsUI();
 }
 
 bool UTicTacToeBoardWidget::ValidateTrainingSetup() const
 {
     return LeftControllerType == ETicTacToeControllerType::ReinforcementLearningAI
         || RightControllerType == ETicTacToeControllerType::ReinforcementLearningAI;
+}
+
+void UTicTacToeBoardWidget::InitializeTrainingSettingsUI()
+{
+    if (TrainingEpisodeSpinBox)
+    {
+        TrainingEpisodeSpinBox->SetMinValue(1.0f);
+        TrainingEpisodeSpinBox->SetMinSliderValue(1.0f);
+        TrainingEpisodeSpinBox->SetMaxSliderValue(100000.0f);
+        TrainingEpisodeSpinBox->SetValue(static_cast<float>(PendingTrainingSettings.EpisodeCount));
+    }
+
+    USpinBox* RateSpinBoxes[] =
+    {
+        LearningRateSpinBox,
+        DiscountFactorSpinBox,
+        ExplorationRateSpinBox
+    };
+
+    for (USpinBox* SpinBox : RateSpinBoxes)
+    {
+        if (SpinBox)
+        {
+            SpinBox->SetMinValue(0.0f);
+            SpinBox->SetMaxValue(1.0f);
+            SpinBox->SetMinSliderValue(0.0f);
+            SpinBox->SetMaxSliderValue(1.0f);
+        }
+    }
+
+    if (LearningRateSpinBox)
+    {
+        LearningRateSpinBox->SetValue(PendingTrainingSettings.LearningRate);
+    }
+
+    if (DiscountFactorSpinBox)
+    {
+        DiscountFactorSpinBox->SetValue(PendingTrainingSettings.DiscountFactor);
+    }
+
+    if (ExplorationRateSpinBox)
+    {
+        ExplorationRateSpinBox->SetValue(PendingTrainingSettings.ExplorationRate);
+    }
+}
+
+void UTicTacToeBoardWidget::RefreshTrainingSettingsUI()
+{
+    SetTrainingSettingsControlsVisibility(CurrentMenuAction == ETicTacToeMenuAction::Train);
+}
+
+FTicTacToeRLTrainingSettings UTicTacToeBoardWidget::GetTrainingSettingsFromUI() const
+{
+    FTicTacToeRLTrainingSettings Settings = PendingTrainingSettings;
+
+    if (TrainingEpisodeSpinBox)
+    {
+        Settings.EpisodeCount = FMath::Max(1, FMath::RoundToInt(TrainingEpisodeSpinBox->GetValue()));
+    }
+
+    if (LearningRateSpinBox)
+    {
+        Settings.LearningRate = FMath::Clamp(LearningRateSpinBox->GetValue(), 0.0f, 1.0f);
+    }
+
+    if (DiscountFactorSpinBox)
+    {
+        Settings.DiscountFactor = FMath::Clamp(DiscountFactorSpinBox->GetValue(), 0.0f, 1.0f);
+    }
+
+    if (ExplorationRateSpinBox)
+    {
+        Settings.ExplorationRate = FMath::Clamp(ExplorationRateSpinBox->GetValue(), 0.0f, 1.0f);
+    }
+
+    return Settings;
+}
+
+void UTicTacToeBoardWidget::SetTrainingSettingsControlsVisibility(bool bVisible) const
+{
+    UWidget* TrainingSettingsControls[] =
+    {
+        TrainingSettingsPanel,
+        TrainingEpisodeSpinBox,
+        LearningRateSpinBox,
+        DiscountFactorSpinBox,
+        ExplorationRateSpinBox
+    };
+
+    for (UWidget* Widget : TrainingSettingsControls)
+    {
+        SetPanelVisibility(Widget, bVisible);
+    }
 }
 
 void UTicTacToeBoardWidget::StartMatch()
@@ -931,12 +1028,19 @@ void UTicTacToeBoardWidget::StartRLTrainingPlaceholder()
         return;
     }
 
-    if (TicTacToeGameMode->StartRLTrainingPlaceholder(LeftControllerType, RightControllerType, LeftRLAgentSlot, RightRLAgentSlot))
+    PendingTrainingSettings = GetTrainingSettingsFromUI();
+
+    if (TicTacToeGameMode->StartRLTrainingPlaceholder(LeftControllerType, RightControllerType, LeftRLAgentSlot, RightRLAgentSlot, PendingTrainingSettings))
     {
         if (MenuWarningText)
         {
             // Future RL training hook: replace this message with progress from the real trainer.
-            MenuWarningText->SetText(FText::FromString(TEXT("RL training placeholder started.")));
+            MenuWarningText->SetText(FText::FromString(FString::Printf(
+                TEXT("RL training placeholder started: %d episodes, alpha %.2f, gamma %.2f, epsilon %.2f."),
+                PendingTrainingSettings.EpisodeCount,
+                PendingTrainingSettings.LearningRate,
+                PendingTrainingSettings.DiscountFactor,
+                PendingTrainingSettings.ExplorationRate)));
             MenuWarningText->SetVisibility(ESlateVisibility::Visible);
         }
     }

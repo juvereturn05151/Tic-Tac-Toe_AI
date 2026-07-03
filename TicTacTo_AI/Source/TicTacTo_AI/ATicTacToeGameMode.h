@@ -80,7 +80,7 @@ public:
     void StartConfiguredMatch(ETicTacToeControllerType NewXController, ETicTacToeControllerType NewOController, ETicTacToeRLAgentSlot NewXRLAgentSlot, ETicTacToeRLAgentSlot NewORLAgentSlot);
 
     UFUNCTION(BlueprintCallable, Category = "TicTacToe|RL")
-    bool StartRLTrainingPlaceholder(ETicTacToeControllerType NewXController, ETicTacToeControllerType NewOController, ETicTacToeRLAgentSlot NewXRLAgentSlot, ETicTacToeRLAgentSlot NewORLAgentSlot);
+    bool StartRLTrainingPlaceholder(ETicTacToeControllerType NewXController, ETicTacToeControllerType NewOController, ETicTacToeRLAgentSlot NewXRLAgentSlot, ETicTacToeRLAgentSlot NewORLAgentSlot, FTicTacToeRLTrainingSettings TrainingSettings);
 
     UFUNCTION(BlueprintCallable, Category = "TicTacToe")
     ETicTacToeControllerType GetControllerForPlayer(ETileState Player) const;
