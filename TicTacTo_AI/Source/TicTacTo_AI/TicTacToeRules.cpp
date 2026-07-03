@@ -84,6 +84,32 @@ bool FTicTacToeRules::CheckDraw(const TArray<ETileState>& Board)
     return true;
 }
 
+FString FTicTacToeRules::GetBoardStateKey(const TArray<ETileState>& Board)
+{
+    FString StateKey;
+    StateKey.Reserve(9);
+
+    for (int32 Index = 0; Index < 9; ++Index)
+    {
+        const ETileState Tile = Board.IsValidIndex(Index) ? Board[Index] : ETileState::Empty;
+
+        if (Tile == ETileState::X)
+        {
+            StateKey.AppendChar(TEXT('X'));
+        }
+        else if (Tile == ETileState::O)
+        {
+            StateKey.AppendChar(TEXT('O'));
+        }
+        else
+        {
+            StateKey.AppendChar(TEXT('_'));
+        }
+    }
+
+    return StateKey;
+}
+
 FString FTicTacToeRules::GetTileText(const TArray<ETileState>& Board, int32 Index)
 {
     if (!Board.IsValidIndex(Index))

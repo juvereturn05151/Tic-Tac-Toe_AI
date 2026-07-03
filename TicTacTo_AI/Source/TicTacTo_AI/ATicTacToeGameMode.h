@@ -102,5 +102,6 @@ private:
     void UpdatePlayModeFromControllers();
     ETicTacToeControllerType GetAIControllerType(ETicTacToeAIType AIType) const;
     FString GetControllerLabel(ETicTacToeControllerType ControllerType) const;
+    FString GetRLAgentSaveSlotName(ETicTacToeRLAgentSlot AgentSlot) const;
     void SwitchTurn();
 };

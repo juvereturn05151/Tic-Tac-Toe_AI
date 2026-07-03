@@ -7,6 +7,7 @@
 #include "ATicTacToeGameMode.h"
 
 #include "TicTacToeAlphaBetaAI.h"
+#include "TicTacToeRLTrainingManager.h"
 #include "TicTacToeRules.h"
 
 ATicTacToeGameMode::ATicTacToeGameMode()
@@ -198,13 +199,19 @@ bool ATicTacToeGameMode::StartRLTrainingPlaceholder(ETicTacToeControllerType New
     TrainingSettings.DiscountFactor = FMath::Clamp(TrainingSettings.DiscountFactor, 0.0f, 1.0f);
     TrainingSettings.ExplorationRate = FMath::Clamp(TrainingSettings.ExplorationRate, 0.0f, 1.0f);
 
-    // Future RL training hook: connect the trainer here, using XRLAgentSlot and ORLAgentSlot
-    // to choose which saved agent(s) are updated and TrainingSettings to configure the run.
-    UE_LOG(LogTemp, Log, TEXT("RL training placeholder: Episodes=%d LearningRate=%.3f DiscountFactor=%.3f ExplorationRate=%.3f"),
-        TrainingSettings.EpisodeCount,
-        TrainingSettings.LearningRate,
-        TrainingSettings.DiscountFactor,
-        TrainingSettings.ExplorationRate);
+    const ETicTacToeRLAgentSlot TrainingSlot = NewXController == ETicTacToeControllerType::ReinforcementLearningAI
+        ? NewXRLAgentSlot
+        : NewORLAgentSlot;
+    const FString SaveSlotName = GetRLAgentSaveSlotName(TrainingSlot);
+
+    UTicTacToeRLTrainingManager* TrainingManager = NewObject<UTicTacToeRLTrainingManager>(this);
+    if (!TrainingManager)
+    {
+        return false;
+    }
+
+    TrainingManager->SetTrainingSettings(TrainingSettings);
+    TrainingManager->TrainAgentVsRandom(TrainingSettings.EpisodeCount, SaveSlotName);
 
     return true;
 }
@@ -370,10 +377,25 @@ FString ATicTacToeGameMode::GetControllerLabel(ETicTacToeControllerType Controll
     return TEXT("Human");
 }
 
+FString ATicTacToeGameMode::GetRLAgentSaveSlotName(ETicTacToeRLAgentSlot AgentSlot) const
+{
+    if (AgentSlot == ETicTacToeRLAgentSlot::Slot2)
+    {
+        return TEXT("TicTacToeRL_Slot2");
+    }
+
+    if (AgentSlot == ETicTacToeRLAgentSlot::Slot3)
+    {
+        return TEXT("TicTacToeRL_Slot3");
+    }
+
+    return TEXT("TicTacToeRL_Slot1");
+}
+
 bool ATicTacToeGameMode::MakeReinforcementLearningAIMove()
 {
-    // Future AlphaBeta/RL separation hook: replace this random move with inference from
-    // the selected RL agent slot for CurrentPlayer.
+    // Future Play-mode RL hook: load the selected saved Q-table for CurrentPlayer's
+    // RL slot and call FTicTacToeQLearningAgent::ChooseAction(Board, false).
     return MakeRandomAIMove();
 }
 

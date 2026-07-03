@@ -12,6 +12,7 @@
 #include "Components/Widget.h"
 #include "Kismet/GameplayStatics.h"
 #include "ATicTacToeGameMode.h"
+#include "TicTacToeRLTrainingManager.h"
 
 void UTicTacToeBoardWidget::NativeConstruct()
 {
@@ -852,6 +853,21 @@ FString UTicTacToeBoardWidget::GetRLAgentSlotLabel(ETicTacToeRLAgentSlot AgentSl
     return TEXT("RL Agent Slot 1");
 }
 
+FString UTicTacToeBoardWidget::GetRLAgentSaveSlotName(ETicTacToeRLAgentSlot AgentSlot) const
+{
+    if (AgentSlot == ETicTacToeRLAgentSlot::Slot2)
+    {
+        return TEXT("TicTacToeRL_Slot2");
+    }
+
+    if (AgentSlot == ETicTacToeRLAgentSlot::Slot3)
+    {
+        return TEXT("TicTacToeRL_Slot3");
+    }
+
+    return TEXT("TicTacToeRL_Slot1");
+}
+
 FString UTicTacToeBoardWidget::GetMenuActionLabel(ETicTacToeMenuAction MenuAction) const
 {
     return MenuAction == ETicTacToeMenuAction::Train ? TEXT("Train") : TEXT("Play");
@@ -1022,27 +1038,30 @@ void UTicTacToeBoardWidget::StartMatch()
 
 void UTicTacToeBoardWidget::StartRLTrainingPlaceholder()
 {
-    ATicTacToeGameMode* TicTacToeGameMode = Cast<ATicTacToeGameMode>(UGameplayStatics::GetGameMode(this));
-    if (!TicTacToeGameMode)
+    UTicTacToeRLTrainingManager* TrainingManager = NewObject<UTicTacToeRLTrainingManager>(this);
+    if (!TrainingManager)
     {
         return;
     }
 
     PendingTrainingSettings = GetTrainingSettingsFromUI();
+    const ETicTacToeRLAgentSlot TrainingSlot = LeftControllerType == ETicTacToeControllerType::ReinforcementLearningAI
+        ? LeftRLAgentSlot
+        : RightRLAgentSlot;
+    const FString SaveSlotName = GetRLAgentSaveSlotName(TrainingSlot);
 
-    if (TicTacToeGameMode->StartRLTrainingPlaceholder(LeftControllerType, RightControllerType, LeftRLAgentSlot, RightRLAgentSlot, PendingTrainingSettings))
+    TrainingManager->SetTrainingSettings(PendingTrainingSettings);
+    const FTicTacToeRLTrainingStats TrainingStats = TrainingManager->TrainAgentVsRandom(PendingTrainingSettings.EpisodeCount, SaveSlotName);
+
+    if (MenuWarningText)
     {
-        if (MenuWarningText)
-        {
-            // Future RL training hook: replace this message with progress from the real trainer.
-            MenuWarningText->SetText(FText::FromString(FString::Printf(
-                TEXT("RL training placeholder started: %d episodes, alpha %.2f, gamma %.2f, epsilon %.2f."),
-                PendingTrainingSettings.EpisodeCount,
-                PendingTrainingSettings.LearningRate,
-                PendingTrainingSettings.DiscountFactor,
-                PendingTrainingSettings.ExplorationRate)));
-            MenuWarningText->SetVisibility(ESlateVisibility::Visible);
-        }
+        MenuWarningText->SetText(FText::FromString(FString::Printf(
+            TEXT("RL training complete: %d episodes, wins %d, losses %d, draws %d."),
+            TrainingStats.TotalEpisodes,
+            TrainingStats.RLWins,
+            TrainingStats.RLLosses,
+            TrainingStats.Draws)));
+        MenuWarningText->SetVisibility(ESlateVisibility::Visible);
     }
 }
 

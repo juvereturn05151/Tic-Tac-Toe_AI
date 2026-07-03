@@ -399,6 +399,7 @@ protected:
     ETicTacToeRLAgentSlot GetNextRLAgentSlot(ETicTacToeRLAgentSlot AgentSlot, int32 Direction) const;
     FString GetControllerTypeLabel(ETicTacToeControllerType ControllerType) const;
     FString GetRLAgentSlotLabel(ETicTacToeRLAgentSlot AgentSlot) const;
+    FString GetRLAgentSaveSlotName(ETicTacToeRLAgentSlot AgentSlot) const;
     FString GetMenuActionLabel(ETicTacToeMenuAction MenuAction) const;
     void UpdateSelectionUI();
     bool ValidateTrainingSetup() const;

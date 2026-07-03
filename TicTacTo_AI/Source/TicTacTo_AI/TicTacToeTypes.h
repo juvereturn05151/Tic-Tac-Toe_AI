@@ -82,5 +82,31 @@ struct TICTACTO_AI_API FTicTacToeRLTrainingSettings
     float DiscountFactor = 0.95f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TicTacToe|RL Training", meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
-    float ExplorationRate = 1.0f;
+    float ExplorationRate = 0.2f;
+};
+
+USTRUCT(BlueprintType)
+struct TICTACTO_AI_API FTicTacToeRLTrainingStats
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TicTacToe|RL Training")
+    int32 TotalEpisodes = 0;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TicTacToe|RL Training")
+    int32 RLWins = 0;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TicTacToe|RL Training")
+    int32 RLLosses = 0;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TicTacToe|RL Training")
+    int32 Draws = 0;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TicTacToe|RL Training")
+    float WinRate = 0.0f;
+
+    void Recalculate()
+    {
+        WinRate = TotalEpisodes > 0 ? static_cast<float>(RLWins) / static_cast<float>(TotalEpisodes) : 0.0f;
+    }
 };

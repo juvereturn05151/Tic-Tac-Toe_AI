@@ -17,5 +17,6 @@ public:
     static void GetAvailableMoves(const TArray<ETileState>& Board, TArray<int32>& OutMoves);
     static bool CheckWinner(const TArray<ETileState>& Board, ETileState Player);
     static bool CheckDraw(const TArray<ETileState>& Board);
+    static FString GetBoardStateKey(const TArray<ETileState>& Board);
     static FString GetTileText(const TArray<ETileState>& Board, int32 Index);
 };
