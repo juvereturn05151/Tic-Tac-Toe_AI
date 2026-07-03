@@ -78,6 +78,12 @@ void UTicTacToeBoardWidget::NativeConstruct()
         RestartButton->OnClicked.AddDynamic(this, &UTicTacToeBoardWidget::OnRestartClicked);
     }
 
+    if (BackButton)
+    {
+        BackButton->OnClicked.RemoveDynamic(this, &UTicTacToeBoardWidget::OnBackClicked);
+        BackButton->OnClicked.AddDynamic(this, &UTicTacToeBoardWidget::OnBackClicked);
+    }
+
     if (PlayerVsPlayerButton)
     {
         PlayerVsPlayerButton->OnClicked.RemoveDynamic(this, &UTicTacToeBoardWidget::OnPlayerVsPlayerClicked);
@@ -333,6 +339,85 @@ void UTicTacToeBoardWidget::OnRestartClicked()
     TicTacToeGameMode->ResetGame();
     ShowBoard();
     UpdateBoardUI();
+}
+
+void UTicTacToeBoardWidget::OnBackClicked()
+{
+    ATicTacToeGameMode* TicTacToeGameMode = Cast<ATicTacToeGameMode>(UGameplayStatics::GetGameMode(this));
+    if (!TicTacToeGameMode)
+    {
+        ShowModeSelect();
+        return;
+    }
+
+    const bool bHasSeparateAISelectScene = AISelectPanel
+        || SideSelectPanel
+        || GetRandomAIButton()
+        || AlphaBetaAIButton
+        || ReinforcementLearningAIButton
+        || ConfirmAIButton
+        || PreviousAIButton
+        || NextAIButton
+        || PreviousXAIButton
+        || NextXAIButton
+        || PreviousOAIButton
+        || NextOAIButton
+        || ToggleSideButton;
+    if (!bHasSeparateAISelectScene)
+    {
+        ShowModeSelect();
+        return;
+    }
+
+    const auto ControllerToAIType = [](ETicTacToeControllerType ControllerType)
+    {
+        if (ControllerType == ETicTacToeControllerType::RandomAI)
+        {
+            return ETicTacToeAIType::Random;
+        }
+
+        if (ControllerType == ETicTacToeControllerType::ReinforcementLearningAI)
+        {
+            return ETicTacToeAIType::ReinforcementLearning;
+        }
+
+        return ETicTacToeAIType::AlphaBeta;
+    };
+
+    const ETicTacToePlayMode CurrentPlayMode = TicTacToeGameMode->GetPlayMode();
+    if (CurrentPlayMode == ETicTacToePlayMode::AIVsAI)
+    {
+        PendingMatchMode = ETicTacToeMatchMode::AIVsAI;
+        PendingXAIType = ControllerToAIType(TicTacToeGameMode->GetControllerForPlayer(ETileState::X));
+        PendingOAIType = ControllerToAIType(TicTacToeGameMode->GetControllerForPlayer(ETileState::O));
+        ShowAISelect();
+        return;
+    }
+
+    if (CurrentPlayMode == ETicTacToePlayMode::PlayerVsRandomAI
+        || CurrentPlayMode == ETicTacToePlayMode::PlayerVsAlphaBetaAI
+        || CurrentPlayMode == ETicTacToePlayMode::PlayerVsReinforcementLearningAI)
+    {
+        PendingMatchMode = ETicTacToeMatchMode::PlayerVsAI;
+        if (CurrentPlayMode == ETicTacToePlayMode::PlayerVsRandomAI)
+        {
+            PendingAIType = ETicTacToeAIType::Random;
+        }
+        else if (CurrentPlayMode == ETicTacToePlayMode::PlayerVsReinforcementLearningAI)
+        {
+            PendingAIType = ETicTacToeAIType::ReinforcementLearning;
+        }
+        else
+        {
+            PendingAIType = ETicTacToeAIType::AlphaBeta;
+        }
+
+        PendingHumanSide = TicTacToeGameMode->IsPlayerAI(ETileState::X) ? ETileState::O : ETileState::X;
+        ShowAISelect();
+        return;
+    }
+
+    ShowModeSelect();
 }
 
 void UTicTacToeBoardWidget::OnPlayerVsPlayerClicked()
@@ -1161,6 +1246,7 @@ void UTicTacToeBoardWidget::SetPanelVisibility(UWidget* Panel, bool bVisible) co
 
 void UTicTacToeBoardWidget::SetBoardControlsVisibility(bool bVisible) const
 {
+    // Board page: controls visible while a match is being played.
     UWidget* BoardControls[] =
     {
         TileButton_0,
@@ -1182,6 +1268,7 @@ void UTicTacToeBoardWidget::SetBoardControlsVisibility(bool bVisible) const
         TileText_7,
         TileText_8,
         RestartButton,
+        BackButton,
         ModeText
     };
 
@@ -1193,6 +1280,7 @@ void UTicTacToeBoardWidget::SetBoardControlsVisibility(bool bVisible) const
 
 void UTicTacToeBoardWidget::SetModeControlsVisibility(bool bVisible) const
 {
+    // Mode select page: legacy/simple menu buttons.
     UWidget* ModeControls[] =
     {
         PlayerVsPlayerButton,
@@ -1208,6 +1296,7 @@ void UTicTacToeBoardWidget::SetModeControlsVisibility(bool bVisible) const
 
 void UTicTacToeBoardWidget::SetSideControlsVisibility(bool bVisible) const
 {
+    // Side select page: human side choice for Player vs AI.
     UWidget* SideControls[] =
     {
         PlayerXButton,
@@ -1222,6 +1311,7 @@ void UTicTacToeBoardWidget::SetSideControlsVisibility(bool bVisible) const
 
 void UTicTacToeBoardWidget::SetAIControlsVisibility(bool bVisible) const
 {
+    // AI select page: AI type choices, including older and newer button names.
     UWidget* AIControls[] =
     {
         GetRandomAIButton(),
@@ -1243,6 +1333,7 @@ void UTicTacToeBoardWidget::SetDeploymentSwitchControlsVisibility(bool bVisible)
     const bool bShowPlayerVsAIControls = bVisible && PendingMatchMode == ETicTacToeMatchMode::PlayerVsAI;
     const bool bShowAIVsAIControls = bVisible && PendingMatchMode == ETicTacToeMatchMode::AIVsAI;
 
+    // AI select page: carousel controls for Player vs AI.
     UWidget* PlayerVsAIControls[] =
     {
         PreviousAIButton,
@@ -1252,6 +1343,7 @@ void UTicTacToeBoardWidget::SetDeploymentSwitchControlsVisibility(bool bVisible)
         SelectedSideText
     };
 
+    // AI select page: carousel controls for AI vs AI.
     UWidget* AIVsAIControls[] =
     {
         PreviousXAIButton,

@@ -24,9 +24,11 @@ class TICTACTO_AI_API UTicTacToeBoardWidget : public UUserWidget
 protected:
     virtual void NativeConstruct() override;
 
+    // Shared status text shown on the menu, selection, and board pages.
     UPROPERTY(meta = (BindWidget))
     UTextBlock* StatusText;
 
+    // Board page: the 3x3 playable grid and in-game controls.
     UPROPERTY(meta = (BindWidget))
     UButton* TileButton_0;
 
@@ -85,8 +87,12 @@ protected:
     UButton* RestartButton;
 
     UPROPERTY(meta = (BindWidgetOptional))
+    UButton* BackButton;
+
+    UPROPERTY(meta = (BindWidgetOptional))
     UTextBlock* ModeText;
 
+    // Mode select page: legacy/simple mode buttons.
     UPROPERTY(meta = (BindWidgetOptional))
     UButton* PlayerVsPlayerButton;
 
@@ -102,12 +108,14 @@ protected:
     UPROPERTY(meta = (BindWidgetOptional))
     UButton* AIVsAIButton;
 
+    // Side select page: choose whether the human player is X or O.
     UPROPERTY(meta = (BindWidgetOptional))
     UButton* PlayerXButton;
 
     UPROPERTY(meta = (BindWidgetOptional))
     UButton* PlayerOButton;
 
+    // AI select page: legacy/simple AI type buttons.
     UPROPERTY(meta = (BindWidgetOptional))
     UButton* RandomAIButton;
 
@@ -120,6 +128,7 @@ protected:
     UPROPERTY(meta = (BindWidgetOptional))
     UButton* ReinforcementLearningAIButton;
 
+    // AI select page: newer carousel-style deployment controls.
     UPROPERTY(meta = (BindWidgetOptional))
     UButton* PreviousAIButton;
 
@@ -156,6 +165,7 @@ protected:
     UPROPERTY(meta = (BindWidgetOptional))
     UTextBlock* SelectedSideText;
 
+    // Main configuration page: controller, RL slot, and play/train selection.
     UPROPERTY(meta = (BindWidgetOptional))
     UWidget* SelectionMenuPanel;
 
@@ -219,6 +229,7 @@ protected:
     UPROPERTY(meta = (BindWidgetOptional))
     UTextBlock* MenuWarningText;
 
+    // Main configuration page: training settings shown only when Train is selected.
     UPROPERTY(meta = (BindWidgetOptional))
     UWidget* TrainingSettingsPanel;
 
@@ -234,6 +245,7 @@ protected:
     UPROPERTY(meta = (BindWidgetOptional))
     USpinBox* ExplorationRateSpinBox;
 
+    // Top-level page containers. Show* methods switch visibility between these.
     UPROPERTY(meta = (BindWidgetOptional))
     UWidget* ModeSelectPanel;
 
@@ -290,6 +302,10 @@ protected:
     void OnRestartClicked();
 
     UFUNCTION()
+    void OnBackClicked();
+
+    // Mode select page handlers.
+    UFUNCTION()
     void OnPlayerVsPlayerClicked();
 
     UFUNCTION()
@@ -304,12 +320,14 @@ protected:
     UFUNCTION()
     void OnAIVsAIClicked();
 
+    // Side select page handlers.
     UFUNCTION()
     void OnPlayerXClicked();
 
     UFUNCTION()
     void OnPlayerOClicked();
 
+    // AI select page handlers.
     UFUNCTION()
     void OnRandomAIClicked();
 
@@ -346,6 +364,7 @@ protected:
     UFUNCTION()
     void OnConfirmAIClicked();
 
+    // Main configuration page handlers.
     UFUNCTION()
     void OnLeftControllerPreviousClicked();
 
